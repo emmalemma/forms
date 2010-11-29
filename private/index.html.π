@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src='js/mootools.js'> </script>
+		<script src='js/mootools-more.js'> </script>
+		
+		<script src="js/middlewares/init.js"> </script>
+		<script src="js/middlewares/functions.js"> </script>
+		<link rel="stylesheet" type="text/css" href="css/rentsort.css" />
+		
+	</head>
+	
+	<body>
+		
+{%
+window.addEvent 'domready', ->
+	example_data =
+		stuff: yes
+	
+	buildForm =(data)->
+		form = new Element('form',{text: 'this is an example form'})
+
+	
+	buildForm(example_data).inject $('container')
+
+%}
+		<div id="container">
+		</div>
+	</body>
+</html>

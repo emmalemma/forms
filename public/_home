@@ -1,0 +1,57 @@
+<script>  var __hasProp = Object.prototype.hasOwnProperty;
+  $getCurrentUser({
+    callback: function(data) {
+      var _i, _ref, field, user;
+      if (!(data.user)) {
+        return loadPartial('_index.html');
+      } else {
+        user = data.user;
+        console.log({
+          loaded_user: user
+        });
+        _ref = user;
+        for (field in _ref) {
+          if (!__hasProp.call(_ref, field)) continue;
+          _i = _ref[field];
+          $$("#user_details #" + (field)).set('text', data.user[field]);
+        }
+        $$("#user_details #home").set('text', user.home.display);
+        $$("#user_details #work").set('text', user.work.display);
+        return (typeof (_ref = user.matches) !== "undefined" && _ref !== null) ? loadMatches(user.matches) : null;
+      }
+    }
+  });</script>
+
+<div id="user_details">
+	<div>Your email: <span id="_id"></span></div>
+	<div>Your home: <span id="home"></span></div>
+	<div>Your work: <span id="work"></span></div>
+	<div>Your rent: <span id="rent"></span></div>
+</div>
+
+<span id="logout">Log out.</span>
+<script>  $('logout').addEvent('click', function() {
+    return $logout({
+      callback: function() {
+        return loadPartial('_index');
+      }
+    });
+  });</script>
+
+
+
+<div id="matches">
+<script>  var loadMatches;
+  loadMatches = function(matches) {
+    var _i, _len, _ref, _result, match;
+    _result = []; _ref = matches;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      match = _ref[_i];
+      _result.push($('matches').grab(new Element('div', {
+        text: ("Distance: " + (match.distance) + " Rent: " + (match.rent))
+      })));
+    }
+    return _result;
+  };</script>
+</div>
+

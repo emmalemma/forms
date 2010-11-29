@@ -1,0 +1,24 @@
+<script>  $getCurrentUser({
+    callback: function(data) {
+      if (data.user) {
+        return loadPartial('_home');
+      }
+    }
+  });</script>
+
+<h3>Welcome to rentsort!</h3>
+
+<div id="login">
+<p>Log in to review your matches.</p>
+<div><label>Email address:</label> <input type="text" /></div>
+<div><label>Password:</label> <input type="password" /></div>
+</div>
+
+<div id="signup">
+<a id="signup_button">Sign up</a>
+<script>  window.addEvent('domready', function() {
+    return $('signup_button').addEvent('click', function() {
+      return loadPartial('_signup');
+    });
+  });</script>
+</div>
