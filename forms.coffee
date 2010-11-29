@@ -3,7 +3,7 @@ path = require 'path'
 	paradigm_version: "0.2.0"
 	
 	port: 			8007
-	app_dir:		dir= 			'/home/ec2-user/app/forms'
+	app_dir:		dir= 			'/Users/adrian/Projects/forms'
 	private_dir: 	path.join dir, 	'private'
 	public_dir: 	path.join dir, 	'public'
 	client_cs_dir: 	path.join dir, 	'private/cs/'

@@ -1,0 +1,50 @@
+#container {
+	margin: 2em;
+	padding: 2em;
+	border: thin black solid;
+	width: 900px;
+}
+
+.header {
+	text-align: center;
+	font-size: 17pt;
+	font-weight: bold;
+}
+
+.group {
+	border: thin black solid;
+	padding: 1em;
+	margin: 1em;
+}
+
+.group label {
+	font-size: 14pt;
+	margin: 1em;
+	background-color: transparent;
+}
+
+.input label {
+	font-size: 12pt;
+	padding: 0em;
+	background-color: none;
+}
+
+
+.select {
+	border: thin black solid;
+	padding: 1em;
+	margin: 1em;
+}
+
+.markup {
+	padding: 1em;
+	margin: 1em;
+	background-color: lightGray;
+}
+
+.signature {
+	font-style: italic;
+	border-bottom: 2px solid black;
+	margin: 2em;
+	width: 400px;
+}
