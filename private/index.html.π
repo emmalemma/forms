@@ -48,6 +48,9 @@ example_form =
 				{
 					field: 'text'
 					label: 'Name'
+					output:
+						x: 120
+						y: 170
 					data: ->@person.name.full
 				}
 				{	
@@ -149,6 +152,8 @@ labeledInput =(data)->
 	box = $('<div class="input"></div>')
 	.append $("<label>#{data.label}</label>")
 	.append $("<input type='#{data.type}'></input>")
+	
+	.data('meta', data)
 			
 buildGroup =(item)->
 	unless item.label?
@@ -177,12 +182,14 @@ buildField =(item)->
 		when 'markup'
 			$("<div class='markup'></div>").text(item.body)
 		when 'text', 'date', 'vin'
-			labeledInput(label: item.label, type: 'text')
+			item.type = "text"
+			labeledInput item
 		when 'select'
 			box = $("<div class='select'></div>")
 			.append($('<span class="label"></span>').text(item.label))
 			for option in item.options
-				box.append labeledInput(label: option.label, type: 'checkbox')
+				option.type = "checkbox"
+				box.append labeledInput option
 			box
 		when 'signature'
 			$('<div class="signature"></div>').text "#{item.of} will need to sign this form here after it is printed."
@@ -199,16 +206,31 @@ buildForm =(data)->
 		
 	buildBody.bind(form)(data.body)
 	.append $('<input type="button" value="Print Form" id="print"></input>')
-			.click -> printForm.apply @, [data.svg]
+			.click -> printForm.apply @, [data]
 	
 	container.append form
 	
-printForm =(path)->
+printForm =(data)->
 	container = $(@).parents '#container'
-	svg = $("<div></div>").svg loadURL: "/pdfs/#{path}"
-	
-	svg.appendTo container
-	
+	form = $(@).parents 'form'
+	div = $("<div></div>")
+	.css(height: 1000, width: 900)
+	.appendTo container
+	svg = div.svg loadURL: "/pdfs/#{data.svg}", onLoad: (svg)->
+																$('input').each (i, val)->
+																	input = $(val)
+																	data = input.data('meta')
+			
+																	if data and data.output?
+																		console.log input.attr('type')
+																		if input.attr('type') == 'text'
+																			console.log drawing: val.value
+																			svg.text null, data.output.x, data.output.y, val.value
+																		else if input.attr('type') == 'checkbox'
+																			svg.text(null, data.output.x, data.output.y, "X") if val.value == 'on'
+	svg.click (event)->
+		console.log "#{event.offsetX}, #{event.offsetY}"
+																			
 
 %}
 		<div id="container">

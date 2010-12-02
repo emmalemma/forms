@@ -43,8 +43,9 @@ path = require 'path'
 	timeout:	300					#seems like a good balance between cpu and response
 	ignore: 	[
 					'.git'
+					'.DS_Store'
 					/.+\/public\/.+/ #fun little loop here
-					/^\..+/			#anything that starts in . probably not necessary
+					/^\./			#anything that starts in . probably not necessary
 					/\.tmp$/		#same for .tmps
 					/\.swp$/		#good joke vim	
 			]

@@ -51,6 +51,10 @@
           {
             field: 'text',
             label: 'Name',
+            output: {
+              x: 120,
+              y: 170
+            },
             data: function() {
               return this.person.name.full;
             }
@@ -174,7 +178,7 @@
   });
   labeledInput = function(data) {
     var box;
-    return (box = $('<div class="input"></div>').append($("<label>" + (data.label) + "</label>").append($("<input type='" + (data.type) + "'></input>"))));
+    return (box = $('<div class="input"></div>').append($("<label>" + (data.label) + "</label>").append($("<input type='" + (data.type) + "'></input>").data('meta', data))));
   };
   buildGroup = function(item) {
     var _ref, group;
@@ -221,19 +225,15 @@
       case 'text':
       case 'date':
       case 'vin':
-        return labeledInput({
-          label: item.label,
-          type: 'text'
-        });
+        item.type = "text";
+        return labeledInput(item);
       case 'select':
         box = $("<div class='select'></div>").append($('<span class="label"></span>').text(item.label));
         _ref = item.options;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           option = _ref[_i];
-          box.append(labeledInput({
-            label: option.label,
-            type: 'checkbox'
-          }));
+          option.type = "checkbox";
+          box.append(labeledInput(option));
         }
         return box;
       case 'signature':
@@ -254,17 +254,44 @@
     })()));
     form = $('<form class="paper"></form>');
     buildBody.bind(form)(data.body).append($('<input type="button" value="Print Form" id="print"></input>').click(function() {
-      return printForm.apply(this, [data.svg]);
+      return printForm.apply(this, [data]);
     }));
     return container.append(form);
   };
-  printForm = function(path) {
-    var container, svg;
+  printForm = function(data) {
+    var container, div, form, svg;
     container = $(this).parents('#container');
-    svg = $("<div></div>").svg({
-      loadURL: ("/pdfs/" + (path))
+    form = $(this).parents('form');
+    div = $("<div></div>").css({
+      height: 1000,
+      width: 900
+    }).appendTo(container);
+    svg = div.svg({
+      loadURL: ("/pdfs/" + (data.svg)),
+      onLoad: function(svg) {
+        return $('input').each(function(i, val) {
+          var _ref, input;
+          input = $(val);
+          data = input.data('meta');
+          if (data && (typeof (_ref = data.output) !== "undefined" && _ref !== null)) {
+            console.log(input.attr('type'));
+            if (input.attr('type') === 'text') {
+              console.log({
+                drawing: val.value
+              });
+              return svg.text(null, data.output.x, data.output.y, val.value);
+            } else if (input.attr('type') === 'checkbox') {
+              if (val.value === 'on') {
+                return svg.text(null, data.output.x, data.output.y, "X");
+              }
+            }
+          }
+        });
+      }
     });
-    return svg.appendTo(container);
+    return svg.click(function(event) {
+      return console.log("" + (event.offsetX) + ", " + (event.offsetY));
+    });
   };</script>
 		<div id="container">
 		</div>
