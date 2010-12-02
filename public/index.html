@@ -1,288 +1,271 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<script src='js/mootools.js'> </script>
-		<script src='js/mootools-more.js'> </script>
-		
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"> </script>
 		<script src="js/middlewares/init.js"> </script>
 		<script src="js/middlewares/functions.js"> </script>
+		<script src="js/jquery-svg.js"> </script>
 		<link rel="stylesheet" type="text/css" href="css/forms.css" />
+		
+		<style type="text/css">
+			@import "css/jquery.svg.css";
+			#svg1 {
+				width: 200px;
+				height: 200px;
+			}
+		</style>
 		
 	</head>
 	
 	<body>
 		
-<script>  window.addEvent('domready', function() {
-    var buildBody, buildField, buildForm, buildGroup, example_form, labeledInput;
-    example_form = {
-      provider: 'COMMONWEALTH OF MASSACHUSETTS REGISTRY OF MOTOR VEHICLES',
-      title: 'MOTORIZED BICYCLE (MOPED) REGISTRATION',
-      body: [
-        {
-          field: 'fee',
-          payee: 'MassDOT',
-          price: {
-            40: 'Before November 1st',
-            30: 'On or after November 1st'
-          },
-          desc: 'Registration fee for biennial (2-year) registration'
-        }, {
-          field: 'select',
-          label: 'This is a',
-          options: [
-            {
-              label: 'New Registration'
-            }, {
-              label: 'Renewal'
-            }
-          ]
-        }, {
-          group: 'person',
-          label: 'Registrant',
-          body: [
-            {
-              field: 'text',
-              label: 'Name',
-              data: function() {
-                return this.person.name.full;
-              }
-            }, {
-              field: 'text',
-              label: 'No./Street',
-              data: function() {
-                return this.person.address.street;
-              }
-            }, {
-              field: 'text',
-              label: 'P.O. Box',
-              data: function() {
-                return this.person.address.po_box;
-              }
-            }, {
-              field: 'text',
-              label: 'City/Town',
-              data: function() {
-                return this.person.address.locality;
-              }
-            }, {
-              field: 'text',
-              label: 'Zip',
-              data: function() {
-                return this.person.address.zipcode;
-              }
-            }
-          ]
-        }, {
-          group: 'vehicle',
-          of: 'Registrant',
-          label: 'Moped',
-          body: [
-            {
-              field: 'select',
-              label: 'I purchased this moped',
-              options: [
-                {
-                  label: 'New',
-                  data: function() {
-                    return !this.vehicle.used;
-                  }
-                }, {
-                  label: 'Used',
-                  data: function() {
-                    return this.vehicle.used;
-                  }
-                }
-              ]
-            }, {
-              field: 'text',
-              label: 'Make or Brand Name',
-              data: function() {
-                return this.vehicle.make;
-              }
-            }, {
-              field: 'text',
-              label: 'Model',
-              data: function() {
-                return this.vehicle.model;
-              }
-            }, {
-              field: 'year',
-              label: 'Year',
-              data: function() {
-                return this.vehicle.year;
-              }
-            }, {
-              field: 'text',
-              label: 'Color',
-              data: function() {
-                return this.vehicle.color;
-              }
-            }, {
-              field: 'vin',
-              label: 'VIN',
-              data: function() {
-                return this.vehicle.vin;
-              }
-            }
-          ]
-        }, {
-          field: 'markup',
-          body: "According to Massachusetts law (M.G.L. Chapter 90 Section 1), a \"motorized bicycle\" (also known as a “moped”) is defined as a pedal bicycle which has a helper motor, or a non-pedal bicycle which has a motor, and:\
-				1)	has a cylinder capacity of no more than fifty cubic centimeters; 2)	has an automatic transmission; 3)	is capable of a maximum speed of not more than 30 m.p.h.; 4)	complies with all applicable Federal Motor Vehicle Safety Standards (M.G.L. c.90 § 1C).\
-				Note: If this vehicle does not qualify as a motorized bicycle, it may be subject to registration as a “Limited Use Vehicle” if it has been certified as meeting Federal Motor Vehicle Safety Standards as a motorcycle or motor driven cycle. Anyone who mis-registers a motor vehicle as a “motorized bicycle” may be guilty of operating an unregistered, uninsured, uninspected, and untitled “motor vehicle” and the vehicle may be towed and stored at the owner’s expense."
-        }, {
-          group: 'certification',
-          body: [
-            {
-              field: 'select',
-              options: [
-                {
-                  label: 'The vehicle has an automatic transmission'
-                }, {
-                  label: 'The engine does not exceed fifty cubic centimeters in size'
-                }, {
-                  label: 'The maximum speed of this vehicle is no more than 30 miles per hour'
-                }, {
-                  label: 'I am the legal owner of the vehicle'
-                }
-              ]
-            }, {
-              field: 'signature',
-              of: 'Registrant'
-            }, {
-              field: 'date',
-              label: 'Date',
-              data: function() {
-                return this.today;
-              }
-            }
-          ]
-        }
-      ]
-    };
-    labeledInput = function(data) {
-      var box;
-      box = new Element('div', {
-        "class": 'input'
-      });
-      box.grab(new Element('label', {
-        text: data.label
-      }));
-      return box.grab(new Element('input', {
-        type: data.type
-      }));
-    };
-    buildGroup = function(item) {
-      var _ref, group;
-      if (!(typeof (_ref = item.label) !== "undefined" && _ref !== null)) {
-        switch (item.group) {
-          case 'certification':
-            item.label = "Certification";
-            break;
-          case 'person':
-            item.label = "Person";
-            break;
-          case 'vehicle':
-            item.label = "Vehicle";
-            break;
-        }
-      }
-      group = new Element('div', {
-        "class": 'group',
-        id: item.label
-      });
-      group.grab(new Element('label', {
-        text: item.label
-      }));
-      if (item.body) {
-        return buildBody.bind(group)(item.body);
-      }
-    };
-    buildBody = function(body) {
-      var _i, _len, _ref, _ref2, field, group, item;
-      _ref = body;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        item = _ref[_i];
-        if (typeof (_ref2 = item.field) !== "undefined" && _ref2 !== null) {
-          if (field = buildField(item)) {
-            this.grab(field);
+<script>  var buildBody, buildField, buildForm, buildGroup, example_form, labeledInput, printForm;
+  example_form = {
+    provider: 'COMMONWEALTH OF MASSACHUSETTS REGISTRY OF MOTOR VEHICLES',
+    title: 'MOTORIZED BICYCLE (MOPED) REGISTRATION',
+    pdf: 'MA_moped.pdf',
+    svg: 'MA_moped.svg',
+    body: [
+      {
+        field: 'fee',
+        payee: 'MassDOT',
+        price: {
+          40: 'Before November 1st',
+          30: 'On or after November 1st'
+        },
+        desc: 'Registration fee for biennial (2-year) registration'
+      }, {
+        field: 'select',
+        label: 'This is a',
+        options: [
+          {
+            label: 'New Registration'
+          }, {
+            label: 'Renewal'
           }
-        } else if (typeof (_ref2 = item.group) !== "undefined" && _ref2 !== null) {
-          if (group = buildGroup(item)) {
-            this.grab(group);
+        ]
+      }, {
+        group: 'person',
+        label: 'Registrant',
+        body: [
+          {
+            field: 'text',
+            label: 'Name',
+            data: function() {
+              return this.person.name.full;
+            }
+          }, {
+            field: 'text',
+            label: 'No./Street',
+            data: function() {
+              return this.person.address.street;
+            }
+          }, {
+            field: 'text',
+            label: 'P.O. Box',
+            data: function() {
+              return this.person.address.po_box;
+            }
+          }, {
+            field: 'text',
+            label: 'City/Town',
+            data: function() {
+              return this.person.address.locality;
+            }
+          }, {
+            field: 'text',
+            label: 'Zip',
+            data: function() {
+              return this.person.address.zipcode;
+            }
           }
+        ]
+      }, {
+        group: 'vehicle',
+        of: 'Registrant',
+        label: 'Moped',
+        body: [
+          {
+            field: 'select',
+            label: 'I purchased this moped',
+            options: [
+              {
+                label: 'New',
+                data: function() {
+                  return !this.vehicle.used;
+                }
+              }, {
+                label: 'Used',
+                data: function() {
+                  return this.vehicle.used;
+                }
+              }
+            ]
+          }, {
+            field: 'text',
+            label: 'Make or Brand Name',
+            data: function() {
+              return this.vehicle.make;
+            }
+          }, {
+            field: 'text',
+            label: 'Model',
+            data: function() {
+              return this.vehicle.model;
+            }
+          }, {
+            field: 'year',
+            label: 'Year',
+            data: function() {
+              return this.vehicle.year;
+            }
+          }, {
+            field: 'text',
+            label: 'Color',
+            data: function() {
+              return this.vehicle.color;
+            }
+          }, {
+            field: 'vin',
+            label: 'VIN',
+            data: function() {
+              return this.vehicle.vin;
+            }
+          }
+        ]
+      }, {
+        field: 'markup',
+        body: "According to Massachusetts law (M.G.L. Chapter 90 Section 1), a \"motorized bicycle\" (also known as a “moped”) is defined as a pedal bicycle which has a helper motor, or a non-pedal bicycle which has a motor, and:\
+			1)	has a cylinder capacity of no more than fifty cubic centimeters; 2)	has an automatic transmission; 3)	is capable of a maximum speed of not more than 30 m.p.h.; 4)	complies with all applicable Federal Motor Vehicle Safety Standards (M.G.L. c.90 § 1C).\
+			Note: If this vehicle does not qualify as a motorized bicycle, it may be subject to registration as a “Limited Use Vehicle” if it has been certified as meeting Federal Motor Vehicle Safety Standards as a motorcycle or motor driven cycle. Anyone who mis-registers a motor vehicle as a “motorized bicycle” may be guilty of operating an unregistered, uninsured, uninspected, and untitled “motor vehicle” and the vehicle may be towed and stored at the owner’s expense."
+      }, {
+        group: 'certification',
+        body: [
+          {
+            field: 'select',
+            options: [
+              {
+                label: 'The vehicle has an automatic transmission'
+              }, {
+                label: 'The engine does not exceed fifty cubic centimeters in size'
+              }, {
+                label: 'The maximum speed of this vehicle is no more than 30 miles per hour'
+              }, {
+                label: 'I am the legal owner of the vehicle'
+              }
+            ]
+          }, {
+            field: 'signature',
+            of: 'Registrant'
+          }, {
+            field: 'date',
+            label: 'Date',
+            data: function() {
+              return this.today;
+            }
+          }
+        ]
+      }
+    ]
+  };
+  $(document).ready(function() {
+    console.log("DOM loaded");
+    return buildForm(example_form).appendTo($('#container'));
+  });
+  labeledInput = function(data) {
+    var box;
+    return (box = $('<div class="input"></div>').append($("<label>" + (data.label) + "</label>").append($("<input type='" + (data.type) + "'></input>"))));
+  };
+  buildGroup = function(item) {
+    var _ref, group;
+    if (!(typeof (_ref = item.label) !== "undefined" && _ref !== null)) {
+      switch (item.group) {
+        case 'certification':
+          item.label = "Certification";
+          break;
+        case 'person':
+          item.label = "Person";
+          break;
+        case 'vehicle':
+          item.label = "Vehicle";
+          break;
+      }
+    }
+    group = $("<div class='group'></div>").attr('id', item.label).append($("<label></label>").text(item.label));
+    if (item.body) {
+      return buildBody.bind(group)(item.body);
+    }
+  };
+  buildBody = function(body) {
+    var _i, _len, _ref, _ref2, field, group, item;
+    _ref = body;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      item = _ref[_i];
+      if (typeof (_ref2 = item.field) !== "undefined" && _ref2 !== null) {
+        if (field = buildField(item)) {
+          this.append(field);
+        }
+      } else if (typeof (_ref2 = item.group) !== "undefined" && _ref2 !== null) {
+        if (group = buildGroup(item)) {
+          this.append(group);
         }
       }
-      return this;
-    };
-    buildField = function(item) {
-      var _i, _len, _ref, box, option;
-      switch (item.field) {
-        case 'markup':
-          return new Element('div', {
-            "class": 'markup',
-            text: item.body
-          });
-        case 'text':
-        case 'date':
-        case 'vin':
-          return labeledInput({
-            label: item.label,
-            type: 'text'
-          });
-        case 'select':
-          box = new Element('div', {
-            "class": 'select'
-          });
-          box.grab(new Element('span', {
-            "class": 'label',
-            text: item.label
+    }
+    return this;
+  };
+  buildField = function(item) {
+    var _i, _len, _ref, box, option;
+    switch (item.field) {
+      case 'markup':
+        return $("<div class='markup'></div>").text(item.body);
+      case 'text':
+      case 'date':
+      case 'vin':
+        return labeledInput({
+          label: item.label,
+          type: 'text'
+        });
+      case 'select':
+        box = $("<div class='select'></div>").append($('<span class="label"></span>').text(item.label));
+        _ref = item.options;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          option = _ref[_i];
+          box.append(labeledInput({
+            label: option.label,
+            type: 'checkbox'
           }));
-          _ref = item.options;
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            option = _ref[_i];
-            box.grab(labeledInput({
-              label: option.label,
-              type: 'checkbox'
-            }));
-          }
-          return box;
-        case 'signature':
-          return new Element('div', {
-            "class": 'signature',
-            text: ("" + (item.of) + " will need to sign this form here after it is printed.")
-          });
-      }
-    };
-    buildForm = function(data) {
-      var container, form, header;
-      container = new Element('div', {
-        "class": 'form-layout'
-      });
-      header = new Element('div', {
-        "class": 'header'
-      });
+        }
+        return box;
+      case 'signature':
+        return $('<div class="signature"></div>').text("" + (item.of) + " will need to sign this form here after it is printed.");
+    }
+  };
+  buildForm = function(data) {
+    var container, form, header;
+    container = $('<div class="form-layout"></div>');
+    header = $('<div class="header"></div>').append((function() {
       if (data.provider) {
-        header.grab(new Element('div', {
-          "class": 'provider',
-          text: data.provider
-        }));
+        return $('<div class="provider">').text(data.provider);
       }
+    })().append((function() {
       if (data.title) {
-        header.grab(new Element('div', {
-          "class": 'title',
-          text: data.title
-        }));
+        return $('<div class="title">').text(data.title);
       }
-      container.grab(header);
-      container.grab(form = new Element('form', {
-        "class": 'paper'
-      }));
-      buildBody.bind(form)(data.body);
-      return container;
-    };
-    return buildForm(example_form).inject($('container'));
-  });</script>
+    })()));
+    form = $('<form class="paper"></form>');
+    buildBody.bind(form)(data.body).append($('<input type="button" value="Print Form" id="print"></input>').click(function() {
+      return printForm.apply(this, [data.svg]);
+    }));
+    return container.append(form);
+  };
+  printForm = function(path) {
+    var container, svg;
+    container = $(this).parents('#container');
+    svg = $("<div></div>").svg({
+      loadURL: ("/pdfs/" + (path))
+    });
+    return svg.appendTo(container);
+  };</script>
 		<div id="container">
 		</div>
 	</body>

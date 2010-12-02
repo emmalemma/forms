@@ -17,6 +17,8 @@ path = require 'path'
 		name: 		''
 		views: 		path.join dir, 	"views.coffee"
 		
+	client_lib:		'jquery'
+	
 	middlewares:
 		functions:
 			match:		/^\/\$\/(.+)/
@@ -24,9 +26,13 @@ path = require 'path'
 			client:		yes
 			
 		sessions:
-			client: 	yes
+			client: 	no
 
-		paperboy:  	true
+		paperboy:
+			mimetypes:
+				svg: 'image/svg+xml'
+		
+		
 		
 		
 @Watcher =

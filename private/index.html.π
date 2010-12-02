@@ -1,194 +1,214 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<script src='js/mootools.js'> </script>
-		<script src='js/mootools-more.js'> </script>
-		
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"> </script>
 		<script src="js/middlewares/init.js"> </script>
 		<script src="js/middlewares/functions.js"> </script>
+		<script src="js/jquery-svg.js"> </script>
 		<link rel="stylesheet" type="text/css" href="css/forms.css" />
+		
+		<style type="text/css">
+			@import "css/jquery.svg.css";
+			#svg1 {
+				width: 200px;
+				height: 200px;
+			}
+		</style>
 		
 	</head>
 	
 	<body>
 		
 {%
-window.addEvent 'domready', ->
-	example_form =
-		provider: 	'COMMONWEALTH OF MASSACHUSETTS REGISTRY OF MOTOR VEHICLES'
-		title:		'MOTORIZED BICYCLE (MOPED) REGISTRATION'
-		body: [
+
+example_form =
+	provider: 	'COMMONWEALTH OF MASSACHUSETTS REGISTRY OF MOTOR VEHICLES'
+	title:		'MOTORIZED BICYCLE (MOPED) REGISTRATION'
+	pdf: 'MA_moped.pdf'
+	svg: 'MA_moped.svg'
+	body: [
+			{
+			field: 'fee'
+			payee: 	'MassDOT'
+			price: 	{40: 'Before November 1st', 30: 'On or after November 1st'}
+			desc:	'Registration fee for biennial (2-year) registration'
+			}
+			{
+			field: 'select'
+			label: 'This is a'
+			options: [
+				{label: 	'New Registration'}
+				{label: 	'Renewal'}
+				]
+			}
+			{
+			group: 'person'
+			label: 'Registrant'
+			body: [
 				{
-				field: 'fee'
-				payee: 	'MassDOT'
-				price: 	{40: 'Before November 1st', 30: 'On or after November 1st'}
-				desc:	'Registration fee for biennial (2-year) registration'
+					field: 'text'
+					label: 'Name'
+					data: ->@person.name.full
+				}
+				{	
+					field: 'text'
+					label: 'No./Street'
+					data: ->@person.address.street
 				}
 				{
-				field: 'select'
-				label: 'This is a'
-				options: [
-					{label: 	'New Registration'}
-					{label: 	'Renewal'}
-					]
+					field: 'text'
+					label: 'P.O. Box'
+					data: ->@person.address.po_box
 				}
 				{
-				group: 'person'
-				label: 'Registrant'
+					field: 'text'
+					label: 'City/Town'
+					data: ->@person.address.locality
+				}
+				{
+					field: 'text'
+					label: 'Zip'
+					data: ->@person.address.zipcode
+				}
+				]
+			}
+			{
+				group: 'vehicle'
+				of:		'Registrant'
+				label: 'Moped'
 				body: [
 					{
-						field: 'text'
-						label: 'Name'
-						data: ->@person.name.full
-					}
-					{	
-						field: 'text'
-						label: 'No./Street'
-						data: ->@person.address.street
-					}
-					{
-						field: 'text'
-						label: 'P.O. Box'
-						data: ->@person.address.po_box
+						field: 'select'
+						label: 'I purchased this moped'
+						options: [
+							{label: 'New'
+							data: ->not @vehicle.used}
+							{label: 'Used'
+							data: ->@vehicle.used}
+							]
 					}
 					{
 						field: 'text'
-						label: 'City/Town'
-						data: ->@person.address.locality
+						label: 'Make or Brand Name'
+						data: ->@vehicle.make
 					}
 					{
 						field: 'text'
-						label: 'Zip'
-						data: ->@person.address.zipcode
+						label: 'Model'
+						data: ->@vehicle.model
+					}
+					{
+						field: 'year'
+						label: 'Year'
+						data: ->@vehicle.year
+					}
+					{
+						field: 'text'
+						label: 'Color'
+						data: ->@vehicle.color
+					}
+					{
+						field: 'vin'
+						label: 'VIN'
+						data: ->@vehicle.vin
 					}
 					]
-				}
-				{
-					group: 'vehicle'
-					of:		'Registrant'
-					label: 'Moped'
-					body: [
-						{
-							field: 'select'
-							label: 'I purchased this moped'
-							options: [
-								{label: 'New'
-								data: ->not @vehicle.used}
-								{label: 'Used'
-								data: ->@vehicle.used}
-								]
-						}
-						{
-							field: 'text'
-							label: 'Make or Brand Name'
-							data: ->@vehicle.make
-						}
-						{
-							field: 'text'
-							label: 'Model'
-							data: ->@vehicle.model
-						}
-						{
-							field: 'year'
-							label: 'Year'
-							data: ->@vehicle.year
-						}
-						{
-							field: 'text'
-							label: 'Color'
-							data: ->@vehicle.color
-						}
-						{
-							field: 'vin'
-							label: 'VIN'
-							data: ->@vehicle.vin
-						}
-						]
-					
-				}
-				{field: 'markup'
-				body: "According to Massachusetts law (M.G.L. Chapter 90 Section 1), a \"motorized bicycle\" (also known as a “moped”) is defined as a pedal bicycle which has a helper motor, or a non-pedal bicycle which has a motor, and:
-				1)	has a cylinder capacity of no more than fifty cubic centimeters; 2)	has an automatic transmission; 3)	is capable of a maximum speed of not more than 30 m.p.h.; 4)	complies with all applicable Federal Motor Vehicle Safety Standards (M.G.L. c.90 § 1C).
-				Note: If this vehicle does not qualify as a motorized bicycle, it may be subject to registration as a “Limited Use Vehicle” if it has been certified as meeting Federal Motor Vehicle Safety Standards as a motorcycle or motor driven cycle. Anyone who mis-registers a motor vehicle as a “motorized bicycle” may be guilty of operating an unregistered, uninsured, uninspected, and untitled “motor vehicle” and the vehicle may be towed and stored at the owner’s expense."
-				}
-				{group: 'certification'
-				body: [
-					{field: 'select'
-					options: [
-						{label: 'The vehicle has an automatic transmission'}
-						{label: 'The engine does not exceed fifty cubic centimeters in size'}
-						{label: 'The maximum speed of this vehicle is no more than 30 miles per hour'}
-						{label: 'I am the legal owner of the vehicle'}
-						]
-					}
-					{field: 'signature'
-					of:		'Registrant'}
-					{field: 'date'
-					label: 'Date'
-					data: ->@today}
-					]
-				}
-			
 				
-			]
+			}
+			{field: 'markup'
+			body: "According to Massachusetts law (M.G.L. Chapter 90 Section 1), a \"motorized bicycle\" (also known as a “moped”) is defined as a pedal bicycle which has a helper motor, or a non-pedal bicycle which has a motor, and:
+			1)	has a cylinder capacity of no more than fifty cubic centimeters; 2)	has an automatic transmission; 3)	is capable of a maximum speed of not more than 30 m.p.h.; 4)	complies with all applicable Federal Motor Vehicle Safety Standards (M.G.L. c.90 § 1C).
+			Note: If this vehicle does not qualify as a motorized bicycle, it may be subject to registration as a “Limited Use Vehicle” if it has been certified as meeting Federal Motor Vehicle Safety Standards as a motorcycle or motor driven cycle. Anyone who mis-registers a motor vehicle as a “motorized bicycle” may be guilty of operating an unregistered, uninsured, uninspected, and untitled “motor vehicle” and the vehicle may be towed and stored at the owner’s expense."
+			}
+			{group: 'certification'
+			body: [
+				{field: 'select'
+				options: [
+					{label: 'The vehicle has an automatic transmission'}
+					{label: 'The engine does not exceed fifty cubic centimeters in size'}
+					{label: 'The maximum speed of this vehicle is no more than 30 miles per hour'}
+					{label: 'I am the legal owner of the vehicle'}
+					]
+				}
+				{field: 'signature'
+				of:		'Registrant'}
+				{field: 'date'
+				label: 'Date'
+				data: ->@today}
+				]
+			}
 		
-	labeledInput =(data)->
-		box = new Element('div', class: 'input')
-		box.grab new Element('label', text: data.label)
-		box.grab new Element('input', type: data.type)
-		
-	buildGroup =(item)->
-		unless item.label?
-			switch item.group
-				when 'certification'
-					item.label = "Certification"
-				when 'person'
-					item.label = "Person"
-				when 'vehicle'
-					item.label = "Vehicle"
-					
-		group = new Element('div', class: 'group', id: item.label)
-		group.grab new Element('label', text: item.label)
-		buildBody.bind(group)(item.body) if item.body
-		
-	buildBody =(body)->
-		for item in body
-			if item.field?
-				@grab field if field = buildField(item)
-			else if item.group?
-				@grab group if group = buildGroup(item)
-		this
+			
+		]
+
+$(document).ready ->
+	console.log "DOM loaded"
+	buildForm(example_form).appendTo $('#container')
 	
-	buildField =(item)->
-		switch item.field
-			when 'markup'
-				new Element('div', class: 'markup', text: item.body)
-			when 'text', 'date', 'vin'
-				labeledInput(label: item.label, type: 'text')
-			when 'select'
-				box = new Element('div', class: 'select')
-				box.grab new Element('span', class: 'label', text: item.label)
-				for option in item.options
-					box.grab labeledInput(label: option.label, type: 'checkbox')
-				box
-			when 'signature'
-				new Element('div', class: 'signature', text: "#{item.of} will need to sign this form here after it is printed.")
-		
-		
-	buildForm =(data)->
-		container = new Element('div', class: 'form-layout')
+labeledInput =(data)->
+	box = $('<div class="input"></div>')
+	.append $("<label>#{data.label}</label>")
+	.append $("<input type='#{data.type}'></input>")
 			
-		header = new Element('div', class: 'header')
-		header.grab new Element('div', {class: 'provider', text: data.provider}) if data.provider
-		header.grab new Element('div', {class: 'title', text: data.title}) if data.title
-			
-		container.grab header
-		container.grab form = new Element('form', class: 'paper')
-			
-		buildBody.bind(form)(data.body)
-		container
+buildGroup =(item)->
+	unless item.label?
+		switch item.group
+			when 'certification'
+				item.label = "Certification"
+			when 'person'
+				item.label = "Person"
+			when 'vehicle'
+				item.label = "Vehicle"
+						
+	group = $("<div class='group'></div>").attr('id', item.label)
+	.append $("<label></label>").text(item.label)
+	buildBody.bind(group)(item.body) if item.body
 	
-	buildForm(example_form).inject $('container')
+buildBody =(body)->
+	for item in body
+		if item.field?
+			@append field if field = buildField(item)
+		else if item.group?
+			@append group if group = buildGroup(item)
+	this
+
+buildField =(item)->
+	switch item.field
+		when 'markup'
+			$("<div class='markup'></div>").text(item.body)
+		when 'text', 'date', 'vin'
+			labeledInput(label: item.label, type: 'text')
+		when 'select'
+			box = $("<div class='select'></div>")
+			.append($('<span class="label"></span>').text(item.label))
+			for option in item.options
+				box.append labeledInput(label: option.label, type: 'checkbox')
+			box
+		when 'signature'
+			$('<div class="signature"></div>').text "#{item.of} will need to sign this form here after it is printed."
+	
+	
+buildForm =(data)->
+	container = $('<div class="form-layout"></div>')
+		
+	header = $('<div class="header"></div>')
+	.append ($('<div class="provider">').text(data.provider) if data.provider)
+	.append ($('<div class="title">').text(data.title) if data.title)
+		
+	form = $('<form class="paper"></form>')
+		
+	buildBody.bind(form)(data.body)
+	.append $('<input type="button" value="Print Form" id="print"></input>')
+			.click -> printForm.apply @, [data.svg]
+	
+	container.append form
+	
+printForm =(path)->
+	container = $(@).parents '#container'
+	svg = $("<div></div>").svg loadURL: "/pdfs/#{path}"
+	
+	svg.appendTo container
+	
 
 %}
 		<div id="container">
