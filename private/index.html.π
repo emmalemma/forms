@@ -5,6 +5,7 @@
 		<script src="js/middlewares/init.js"> </script>
 		<script src="js/middlewares/functions.js"> </script>
 		<script src="js/jquery-svg.js"> </script>
+		<script src="js/jquery.jqprint.js"> </script>
 		<link rel="stylesheet" type="text/css" href="css/forms.css" />
 		
 		<style type="text/css">
@@ -49,13 +50,20 @@ example_form =
 					field: 'text'
 					label: 'Name'
 					output:
-						x: 120
-						y: 170
+						x: 123
+						y: 172
+						w: 190
+						h: 14
 					data: ->@person.name.full
 				}
 				{	
 					field: 'text'
 					label: 'No./Street'
+					output:
+						x: 84
+						y: 192
+						w: 225
+						h: 14
 					data: ->@person.address.street
 				}
 				{
@@ -83,11 +91,28 @@ example_form =
 					{
 						field: 'select'
 						label: 'I purchased this moped'
+						output:
+							x: 100
+							y: 100
+							w: 100
+							h: 100
 						options: [
 							{label: 'New'
-							data: ->not @vehicle.used}
+							data: ->not @vehicle.used
+							output:
+								x: 480
+								y: 170
+								w: 20
+								h: 20
+							}
 							{label: 'Used'
-							data: ->@vehicle.used}
+							data: ->@vehicle.used
+							output:
+								x: 525
+								y: 170
+								w: 20
+								h: 20
+							}
 							]
 					}
 					{
@@ -146,7 +171,7 @@ example_form =
 
 $(document).ready ->
 	console.log "DOM loaded"
-	buildForm(example_form).appendTo $('#container')
+	buildForm.apply($('#container'), [example_form])
 	
 labeledInput =(data)->
 	box = $('<div class="input"></div>')
@@ -167,7 +192,7 @@ buildGroup =(item)->
 						
 	group = $("<div class='group'></div>").attr('id', item.label)
 	.append $("<label></label>").text(item.label)
-	buildBody.bind(group)(item.body) if item.body
+	buildBody.apply(group, [item.body]) if item.body
 	
 buildBody =(body)->
 	for item in body
@@ -201,35 +226,215 @@ buildForm =(data)->
 	header = $('<div class="header"></div>')
 	.append ($('<div class="provider">').text(data.provider) if data.provider)
 	.append ($('<div class="title">').text(data.title) if data.title)
+
+ 
+	# form = $('<form class="paper"></form>')
+	# 	
+	# buildBody.apply(form, [data.body])
+	# .append $('<input type="button" value="Print Form" id="print"></input>')
+	# 		.click -> printForm.apply @, [data]
+	# 
+	# form.find('input').change drawField
 		
-	form = $('<form class="paper"></form>')
+	svg = $("<div id='form-svg'></div>")
+	.css(width: '8.5in', height: '11in')
+	.svg loadURL: "/pdfs/#{data.svg}", onLoad: (svg)->
+														svg.configure 
+															width: '8.5in', height: '11in'
+															viewBox: "0 0 612 792"
+														svg.style """
+														@media screen {
+															.field {
+																fill: green; 
+																opacity: 0.2;
+															}
+														}	
+														@media print {
+															.field {
+																display: none;
+															}
+														}"""
+														buildSVGBody.apply svg, [data.body]
+														
+	
+	container.append header
+	container.append svg
+
+	# container.append form
+	
+	container.appendTo @
+	
+buildSVGBody =(body)->
+	for item in body
+		if item.field?
+			buildSVGField.apply @, [item]
+		else if item.group?
+			buildSVGGroup.apply @, [item]
+	
+buildSVGGroup =(item)->
+	unless item.label?
+		switch item.group
+			when 'certification'
+				item.label = "Certification"
+			when 'person'
+				item.label = "Person"
+			when 'vehicle'
+				item.label = "Vehicle"
+
+	# group = $("<div class='group'></div>").attr('id', item.label)
+	# .append $("<label></label>").text(item.label)
+	
+	buildSVGBody.apply @, [item.body] if item.body
+
+buildSVGField =(item)->
+	return unless item.output?
+	switch item.field		# 
+			# when 'markup'
+			# 	$("<div class='markup'></div>").text(item.body)
+		when 'text', 'date', 'vin'
+			item.type = "text"
+			buildSVGElement.apply @, [item]
+		when 'select'
+			console.log select: item
+			for option in item.options
+				console.log building: option
+				option.type = "checkbox"
+				buildSVGElement.apply @, [option]
+		# 		when 'signature'
+		# 			$('<div class="signature"></div>').text "#{item.of} will need to sign this form here after it is printed."
 		
-	buildBody.bind(form)(data.body)
-	.append $('<input type="button" value="Print Form" id="print"></input>')
-			.click -> printForm.apply @, [data]
+buildSVGElement =(item)->
+	showInput =->
+		item.output.text.hide()
+		item.output.input.show()
+
+	hideInput =->
+		item.output.text.show()
+		item.output.input.hide()
+		
+	item.output.rect = @rect item.output.x, item.output.y-item.output.h, item.output.w, item.output.h, class: "field"
+	$(item.output.rect)
+		.mouseenter((event)->
+			showInput()
+		)
+		.mouseleave((event)->
+			hideInput() unless item.output.input.hovered or item.output.input.focused
+		)
+		
+	item.output.text = $(@text item.output.x, item.output.y, '')
+	item.output.text
+		.mouseenter((event)->
+			showInput()
+		)
+		.mouseleave((event)->
+			hideInput() unless item.output.input.hovered or item.output.input.focused
+		)
 	
-	container.append form
+	item.output.input = $('<input />', type: item.type)
+							.css(
+								left: "#{item.output.x-2}pt"
+								top: "#{item.output.y-item.output.h-2}pt"
+								width: "#{item.output.w+4}pt"
+								height: "#{item.output.h+4}pt"
+								display: 'none')
+							.change((event)->
+								switch @type
+									when 'text' then item.output.text.text @value
+									when 'checkbox'
+										if @value == 'on'
+											item.output.text.text "X"
+										else
+											item.output.text.text ""
+							)
+							.mouseover((event)->
+								@hovered = true
+								showInput()
+							)
+							.mouseleave((event)->
+								@hovered = false
+								hideInput() unless @focused
+							)
+							.focus((event)->
+								@focused = true
+								showInput() 
+							)
+							.blur((event)->
+								@focused = false
+								hideInput() 
+							)
+							.keydown((event)->
+								console.log event
+								if event.keyCode == 13 or event.keyCode == 9
+									$(@).change().blur().next().focus()
+									event.preventDefault()
+							)
+							.appendTo @root().parentElement
+							
 	
-printForm =(data)->
-	container = $(@).parents '#container'
-	form = $(@).parents 'form'
-	div = $("<div></div>")
-	.css(height: 1000, width: 900)
-	.appendTo container
-	svg = div.svg loadURL: "/pdfs/#{data.svg}", onLoad: (svg)->
-																$('input').each (i, val)->
-																	input = $(val)
-																	data = input.data('meta')
-			
-																	if data and data.output?
-																		console.log input.attr('type')
-																		if input.attr('type') == 'text'
-																			console.log drawing: val.value
-																			svg.text null, data.output.x, data.output.y, val.value
-																		else if input.attr('type') == 'checkbox'
-																			svg.text(null, data.output.x, data.output.y, "X") if val.value == 'on'
-	svg.click (event)->
-		console.log "#{event.offsetX}, #{event.offsetY}"
+buildIframe =(data)->
+	iframe = $('<iframe id="form-iframe"></iframe>')
+	@.append iframe
+		
+	svg = $("<div id='form-svg'></div>")
+	.css(width: '8.5in', height: '11in')
+	.svg loadURL: "/pdfs/#{data.svg}", onLoad: (svg)->
+														svg.configure 
+															width: '8.5in', height: '11in'
+															viewBox: "0 0 612 792"
+														svg.style """
+														@media screen {
+															.field {
+																fill: green; 
+																opacity: 0.2;
+															}
+														}	
+														@media print {
+															.field {
+																display: none;
+															}
+														}"""
+														buildSVGBody.apply svg, [data.body]
+																		
+	iframe.contents().find('body')
+		.css('margin', '0px')
+		.append(svg)
+	
+drawField =(event)->	
+	
+	svg = $('#form-iframe').contents().find('#form-svg').svg 'get'
+	input = $(@)
+	data = input.data('meta')
+
+	if data and data.output?
+		
+		unless data.output.el?
+			data.output.el = svg.text null, data.output.x, data.output.y, ''
+			input.data 'meta', data
+		
+		if input.attr('type') == 'text'
+			console.log data.output.el
+			$(data.output.el).text input.val()
+					
+		else if input.attr('type') == 'checkbox'
+			if input.val() == 'on'
+				data.output.el.text "X"
+			else
+				data.output.el.text ""
+	
+drawForm =(data)->
+	$('input').each (i, val)->
+		drawField.apply @, [val]
+		
+
+window.print =(data)->
+	$('rect').hide()
+	window.frames["form-iframe"].focus()
+	window.frames["form-iframe"].print()
+	$('rect').show()
+	
+		
+	
+				
 																			
 
 %}

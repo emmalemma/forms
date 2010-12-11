@@ -5,6 +5,7 @@
 		<script src="js/middlewares/init.js"> </script>
 		<script src="js/middlewares/functions.js"> </script>
 		<script src="js/jquery-svg.js"> </script>
+		<script src="js/jquery.jqprint.js"> </script>
 		<link rel="stylesheet" type="text/css" href="css/forms.css" />
 		
 		<style type="text/css">
@@ -19,7 +20,7 @@
 	
 	<body>
 		
-<script>  var buildBody, buildField, buildForm, buildGroup, example_form, labeledInput, printForm;
+<script>  var buildBody, buildField, buildForm, buildGroup, buildIframe, buildSVGBody, buildSVGElement, buildSVGField, buildSVGGroup, drawField, drawForm, example_form, labeledInput;
   example_form = {
     provider: 'COMMONWEALTH OF MASSACHUSETTS REGISTRY OF MOTOR VEHICLES',
     title: 'MOTORIZED BICYCLE (MOPED) REGISTRATION',
@@ -52,8 +53,10 @@
             field: 'text',
             label: 'Name',
             output: {
-              x: 120,
-              y: 170
+              x: 123,
+              y: 172,
+              w: 190,
+              h: 14
             },
             data: function() {
               return this.person.name.full;
@@ -61,6 +64,12 @@
           }, {
             field: 'text',
             label: 'No./Street',
+            output: {
+              x: 84,
+              y: 192,
+              w: 225,
+              h: 14
+            },
             data: function() {
               return this.person.address.street;
             }
@@ -92,16 +101,34 @@
           {
             field: 'select',
             label: 'I purchased this moped',
+            output: {
+              x: 100,
+              y: 100,
+              w: 100,
+              h: 100
+            },
             options: [
               {
                 label: 'New',
                 data: function() {
                   return !this.vehicle.used;
+                },
+                output: {
+                  x: 480,
+                  y: 170,
+                  w: 20,
+                  h: 20
                 }
               }, {
                 label: 'Used',
                 data: function() {
                   return this.vehicle.used;
+                },
+                output: {
+                  x: 525,
+                  y: 170,
+                  w: 20,
+                  h: 20
                 }
               }
             ]
@@ -174,7 +201,7 @@
   };
   $(document).ready(function() {
     console.log("DOM loaded");
-    return buildForm(example_form).appendTo($('#container'));
+    return buildForm.apply($('#container'), [example_form]);
   });
   labeledInput = function(data) {
     var box;
@@ -197,7 +224,7 @@
     }
     group = $("<div class='group'></div>").attr('id', item.label).append($("<label></label>").text(item.label));
     if (item.body) {
-      return buildBody.bind(group)(item.body);
+      return buildBody.apply(group, [item.body]);
     }
   };
   buildBody = function(body) {
@@ -241,7 +268,7 @@
     }
   };
   buildForm = function(data) {
-    var container, form, header;
+    var container, header, svg;
     container = $('<div class="form-layout"></div>');
     header = $('<div class="header"></div>').append((function() {
       if (data.provider) {
@@ -252,46 +279,203 @@
         return $('<div class="title">').text(data.title);
       }
     })()));
-    form = $('<form class="paper"></form>');
-    buildBody.bind(form)(data.body).append($('<input type="button" value="Print Form" id="print"></input>').click(function() {
-      return printForm.apply(this, [data]);
-    }));
-    return container.append(form);
-  };
-  printForm = function(data) {
-    var container, div, form, svg;
-    container = $(this).parents('#container');
-    form = $(this).parents('form');
-    div = $("<div></div>").css({
-      height: 1000,
-      width: 900
-    }).appendTo(container);
-    svg = div.svg({
+    svg = $("<div id='form-svg'></div>").css({
+      width: '8.5in',
+      height: '11in'
+    }).svg({
       loadURL: ("/pdfs/" + (data.svg)),
       onLoad: function(svg) {
-        return $('input').each(function(i, val) {
-          var _ref, input;
-          input = $(val);
-          data = input.data('meta');
-          if (data && (typeof (_ref = data.output) !== "undefined" && _ref !== null)) {
-            console.log(input.attr('type'));
-            if (input.attr('type') === 'text') {
-              console.log({
-                drawing: val.value
-              });
-              return svg.text(null, data.output.x, data.output.y, val.value);
-            } else if (input.attr('type') === 'checkbox') {
-              if (val.value === 'on') {
-                return svg.text(null, data.output.x, data.output.y, "X");
-              }
-            }
-          }
+        svg.configure({
+          width: '8.5in',
+          height: '11in',
+          viewBox: "0 0 612 792"
         });
+        svg.style("@media screen {\n	.field {\n		fill: green; \n		opacity: 0.2;\n	}\n}	\n@media print {\n	.field {\n		display: none;\n	}\n}");
+        return buildSVGBody.apply(svg, [data.body]);
       }
     });
-    return svg.click(function(event) {
-      return console.log("" + (event.offsetX) + ", " + (event.offsetY));
+    container.append(header);
+    container.append(svg);
+    return container.appendTo(this);
+  };
+  buildSVGBody = function(body) {
+    var _i, _len, _ref, _ref2, _result, item;
+    _result = []; _ref = body;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      item = _ref[_i];
+      _result.push((function() {
+        if (typeof (_ref2 = item.field) !== "undefined" && _ref2 !== null) {
+          return buildSVGField.apply(this, [item]);
+        } else if (typeof (_ref2 = item.group) !== "undefined" && _ref2 !== null) {
+          return buildSVGGroup.apply(this, [item]);
+        }
+      }).call(this));
+    }
+    return _result;
+  };
+  buildSVGGroup = function(item) {
+    var _ref;
+    if (!(typeof (_ref = item.label) !== "undefined" && _ref !== null)) {
+      switch (item.group) {
+        case 'certification':
+          item.label = "Certification";
+          break;
+        case 'person':
+          item.label = "Person";
+          break;
+        case 'vehicle':
+          item.label = "Vehicle";
+          break;
+      }
+    }
+    if (item.body) {
+      return buildSVGBody.apply(this, [item.body]);
+    }
+  };
+  buildSVGField = function(item) {
+    var _i, _len, _ref, _result, option;
+    if (!(typeof (_ref = item.output) !== "undefined" && _ref !== null)) {
+      return null;
+    }
+    switch (item.field) {
+      case 'text':
+      case 'date':
+      case 'vin':
+        item.type = "text";
+        return buildSVGElement.apply(this, [item]);
+      case 'select':
+        console.log({
+          select: item
+        });
+        _result = []; _ref = item.options;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          option = _ref[_i];
+          _result.push((function() {
+            console.log({
+              building: option
+            });
+            option.type = "checkbox";
+            return buildSVGElement.apply(this, [option]);
+          }).call(this));
+        }
+        return _result;
+        break;
+    }
+  };
+  buildSVGElement = function(item) {
+    var hideInput, showInput;
+    showInput = function() {
+      item.output.text.hide();
+      return item.output.input.show();
+    };
+    hideInput = function() {
+      item.output.text.show();
+      return item.output.input.hide();
+    };
+    item.output.rect = this.rect(item.output.x, item.output.y - item.output.h, item.output.w, item.output.h, {
+      "class": "field"
     });
+    $(item.output.rect).mouseenter(function(event) {
+      return showInput();
+    }).mouseleave(function(event) {
+      if (!(item.output.input.hovered || item.output.input.focused)) {
+        return hideInput();
+      }
+    });
+    item.output.text = $(this.text(item.output.x, item.output.y, ''));
+    item.output.text.mouseenter(function(event) {
+      return showInput();
+    }).mouseleave(function(event) {
+      if (!(item.output.input.hovered || item.output.input.focused)) {
+        return hideInput();
+      }
+    });
+    return (item.output.input = $('<input />', {
+      type: item.type
+    }).css({
+      left: ("" + (item.output.x - 2) + "pt"),
+      top: ("" + (item.output.y - item.output.h - 2) + "pt"),
+      width: ("" + (item.output.w + 4) + "pt"),
+      height: ("" + (item.output.h + 4) + "pt"),
+      display: 'none'
+    }).change(function(event) {
+      switch (this.type) {
+        case 'text':
+          return item.output.text.text(this.value);
+        case 'checkbox':
+          return this.value === 'on' ? item.output.text.text("X") : item.output.text.text("");
+      }
+    }).mouseover(function(event) {
+      this.hovered = true;
+      return showInput();
+    }).mouseleave(function(event) {
+      this.hovered = false;
+      if (!(this.focused)) {
+        return hideInput();
+      }
+    }).focus(function(event) {
+      this.focused = true;
+      return showInput();
+    }).blur(function(event) {
+      this.focused = false;
+      return hideInput();
+    }).keydown(function(event) {
+      console.log(event);
+      if (event.keyCode === 13 || event.keyCode === 9) {
+        $(this).change().blur().next().focus();
+        return event.preventDefault();
+      }
+    }).appendTo(this.root().parentElement));
+  };
+  buildIframe = function(data) {
+    var iframe, svg;
+    iframe = $('<iframe id="form-iframe"></iframe>');
+    this.append(iframe);
+    svg = $("<div id='form-svg'></div>").css({
+      width: '8.5in',
+      height: '11in'
+    }).svg({
+      loadURL: ("/pdfs/" + (data.svg)),
+      onLoad: function(svg) {
+        svg.configure({
+          width: '8.5in',
+          height: '11in',
+          viewBox: "0 0 612 792"
+        });
+        svg.style("@media screen {\n	.field {\n		fill: green; \n		opacity: 0.2;\n	}\n}	\n@media print {\n	.field {\n		display: none;\n	}\n}");
+        return buildSVGBody.apply(svg, [data.body]);
+      }
+    });
+    return iframe.contents().find('body').css('margin', '0px').append(svg);
+  };
+  drawField = function(event) {
+    var _ref, data, input, svg;
+    svg = $('#form-iframe').contents().find('#form-svg').svg('get');
+    input = $(this);
+    data = input.data('meta');
+    if (data && (typeof (_ref = data.output) !== "undefined" && _ref !== null)) {
+      if (!(typeof (_ref = data.output.el) !== "undefined" && _ref !== null)) {
+        data.output.el = svg.text(null, data.output.x, data.output.y, '');
+        input.data('meta', data);
+      }
+      if (input.attr('type') === 'text') {
+        console.log(data.output.el);
+        return $(data.output.el).text(input.val());
+      } else if (input.attr('type') === 'checkbox') {
+        return input.val() === 'on' ? data.output.el.text("X") : data.output.el.text("");
+      }
+    }
+  };
+  drawForm = function(data) {
+    return $('input').each(function(i, val) {
+      return drawField.apply(this, [val]);
+    });
+  };
+  window.print = function(data) {
+    $('rect').hide();
+    window.frames["form-iframe"].focus();
+    window.frames["form-iframe"].print();
+    return $('rect').show();
   };</script>
 		<div id="container">
 		</div>
