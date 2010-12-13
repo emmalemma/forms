@@ -89,7 +89,7 @@
 		width: 100%;
 	}
 	#form-svg input {
-		display: none;
+		display: none !important;
 	}
 	
 }
