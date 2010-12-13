@@ -76,6 +76,9 @@
 		border: 0px;
 		width: 100%;
 	}
+	.header {
+		display: none;
+	}
 	form {
 		display: none;
 	}
