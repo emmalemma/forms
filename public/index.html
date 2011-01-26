@@ -28,142 +28,126 @@
     svg: 'MA_moped.svg',
     body: [
       {
-        field: 'fee',
-        payee: 'MassDOT',
-        price: {
-          40: 'Before November 1st',
-          30: 'On or after November 1st'
-        },
-        desc: 'Registration fee for biennial (2-year) registration'
-      }, {
-        field: 'select',
-        label: 'This is a',
+        field: "select",
+        output: true,
         options: [
           {
-            label: 'New Registration'
-          }, {
-            label: 'Renewal'
-          }
-        ]
-      }, {
-        group: 'person',
-        label: 'Registrant',
-        body: [
-          {
-            field: 'text',
-            label: 'Name',
-            output: {
-              x: 123,
-              y: 172,
-              w: 190,
-              h: 14
-            },
-            data: function() {
-              return this.person.name.full;
+            "label": "New",
+            "output": {
+              "y": 171,
+              "x": 479,
+              "w": 20,
+              "h": 10
             }
           }, {
-            field: 'text',
-            label: 'No./Street',
-            output: {
-              x: 84,
-              y: 192,
-              w: 225,
-              h: 14
-            },
-            data: function() {
-              return this.person.address.street;
-            }
-          }, {
-            field: 'text',
-            label: 'P.O. Box',
-            data: function() {
-              return this.person.address.po_box;
-            }
-          }, {
-            field: 'text',
-            label: 'City/Town',
-            data: function() {
-              return this.person.address.locality;
-            }
-          }, {
-            field: 'text',
-            label: 'Zip',
-            data: function() {
-              return this.person.address.zipcode;
+            "label": "Used",
+            "output": {
+              "y": 171,
+              "x": 528,
+              "w": 21,
+              "h": 10
             }
           }
         ]
       }, {
-        group: 'vehicle',
-        of: 'Registrant',
-        label: 'Moped',
-        body: [
-          {
-            field: 'select',
-            label: 'I purchased this moped',
-            output: {
-              x: 100,
-              y: 100,
-              w: 100,
-              h: 100
-            },
-            options: [
-              {
-                label: 'New',
-                data: function() {
-                  return !this.vehicle.used;
-                },
-                output: {
-                  x: 480,
-                  y: 170,
-                  w: 20,
-                  h: 20
-                }
-              }, {
-                label: 'Used',
-                data: function() {
-                  return this.vehicle.used;
-                },
-                output: {
-                  x: 525,
-                  y: 170,
-                  w: 20,
-                  h: 20
-                }
-              }
-            ]
-          }, {
-            field: 'text',
-            label: 'Make or Brand Name',
-            data: function() {
-              return this.vehicle.make;
-            }
-          }, {
-            field: 'text',
-            label: 'Model',
-            data: function() {
-              return this.vehicle.model;
-            }
-          }, {
-            field: 'year',
-            label: 'Year',
-            data: function() {
-              return this.vehicle.year;
-            }
-          }, {
-            field: 'text',
-            label: 'Color',
-            data: function() {
-              return this.vehicle.color;
-            }
-          }, {
-            field: 'vin',
-            label: 'VIN',
-            data: function() {
-              return this.vehicle.vin;
-            }
-          }
-        ]
+        "field": "text",
+        "label": "Name of Registrant",
+        "output": {
+          "y": 172,
+          "x": 123,
+          "w": 190,
+          "h": 14
+        }
+      }, {
+        "field": "text",
+        "label": "Make or Brand Name",
+        "output": {
+          "y": 190,
+          "x": 418,
+          "w": 158,
+          "h": 14
+        }
+      }, {
+        "field": "text",
+        "label": "No _/Street",
+        "output": {
+          "y": 191,
+          "x": 86,
+          "w": 227,
+          "h": 14
+        }
+      }, {
+        "field": "text",
+        "label": "Model",
+        "output": {
+          "y": 208,
+          "x": 355,
+          "w": 63,
+          "h": 14
+        }
+      }, {
+        "field": "text",
+        "label": "Year",
+        "output": {
+          "y": 208,
+          "x": 445,
+          "w": 36,
+          "h": 14
+        }
+      }, {
+        "field": "text",
+        "label": "Color",
+        "output": {
+          "y": 208,
+          "x": 513,
+          "w": 63,
+          "h": 14
+        }
+      }, {
+        "field": "text",
+        "label": "P.O. Box",
+        "output": {
+          "y": 210,
+          "x": 80,
+          "w": 232,
+          "h": 14
+        }
+      }, {
+        "field": "text",
+        "label": "VIN",
+        "output": {
+          "y": 227,
+          "x": 349,
+          "w": 10,
+          "h": 14
+        }
+      }, {
+        "field": "text",
+        "label": "City/Town",
+        "output": {
+          "y": 228,
+          "x": 86,
+          "w": 153,
+          "h": 14
+        }
+      }, {
+        "field": "text",
+        "label": "Zip",
+        "output": {
+          "y": 228,
+          "x": 260,
+          "w": 52,
+          "h": 14
+        }
+      }, {
+        "field": "signature",
+        "label": "Signature of Registrant",
+        "output": {
+          "y": 529,
+          "x": 186,
+          "w": 220,
+          "h": 14
+        }
       }, {
         field: 'markup',
         body: "According to Massachusetts law (M.G.L. Chapter 90 Section 1), a \"motorized bicycle\" (also known as a “moped”) is defined as a pedal bicycle which has a helper motor, or a non-pedal bicycle which has a motor, and:\
