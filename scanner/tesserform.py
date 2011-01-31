@@ -3,11 +3,15 @@ from pytesser import *
 
 import couchdb
 
-im = Image.open("tiffs/MA_moped.tiff")
+filename = "MA_moped"
+
+im = Image.open("tiffs/"+filename+".tiff")
 #im.show()
 
 api_key = "parenignodscuryouldrerve"
 password = "xxSpEupF4O8DfL4r1y5tvBVT"
+server = "cushman.cloudant.com"
+database = "forms"
 
 pixmap = {}
 groupmap = {}
@@ -167,20 +171,24 @@ for k in bounds:
 			draw.rectangle(label, outline = '#00F')
 			crop = proof.crop(label)
 			text = image_to_string(crop).strip()
-			if text:
+			if True: #text:
 				print "identified field", text
 				draw.text(rect[:2], text, fill = '#0F0' )
-				fields.append({'field': "text", 'label': text, 'output': {'x': p2p(x), 'y': p2p(y), 'w': p2p(w), 'h': p2p(20)}})
+				fields.append({'field': "text", 'label': text, 'output': {'x': p2p(x), 'y': p2p(y), 'w': p2p(w), 'h': p2p(label[3]- label[1])}})
 
 del draw
 im.show()
 
 print fields
 
-couch = couchdb.Server('http://localhost:5984/')
-db = couch['forms']
+form = {'filename': filename,
+		'status':	'pending',
+		'body': fields}
 
+couch = couchdb.Server('http://'+api_key+":"+password+'@'+server+'/')
+db = couch[database]
 
+db.save(form)
 
 #print allgroups
 

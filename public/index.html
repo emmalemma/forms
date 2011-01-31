@@ -28,27 +28,23 @@
     svg: 'MA_moped.svg',
     body: [
       {
-        field: "select",
-        output: true,
-        options: [
-          {
-            "label": "New",
-            "output": {
-              "y": 171,
-              "x": 479,
-              "w": 20,
-              "h": 10
-            }
-          }, {
-            "label": "Used",
-            "output": {
-              "y": 171,
-              "x": 528,
-              "w": 21,
-              "h": 10
-            }
-          }
-        ]
+        field: "checkbox",
+        "label": "New",
+        "output": {
+          "y": 171,
+          "x": 479,
+          "w": 20,
+          "h": 10
+        }
+      }, {
+        field: "checkbox",
+        "label": "Used",
+        "output": {
+          "y": 171,
+          "x": 528,
+          "w": 21,
+          "h": 10
+        }
       }, {
         "field": "text",
         "label": "Name of Registrant",
@@ -119,7 +115,8 @@
           "y": 227,
           "x": 349,
           "w": 10,
-          "h": 14
+          "h": 14,
+          hovered: true
         }
       }, {
         "field": "text",
@@ -258,11 +255,11 @@
       if (data.provider) {
         return $('<div class="provider">').text(data.provider);
       }
-    })().append((function() {
+    })()).append((function() {
       if (data.title) {
         return $('<div class="title">').text(data.title);
       }
-    })()));
+    })());
     svg = $("<div id='form-svg'></div>").css({
       width: '8.5in',
       height: '11in'
@@ -325,7 +322,8 @@
       case 'text':
       case 'date':
       case 'vin':
-        item.type = "text";
+      case 'checkbox':
+        item.type = item.field;
         return buildSVGElement.apply(this, [item]);
       case 'select':
         console.log({
@@ -344,6 +342,8 @@
         }
         return _result;
         break;
+      case 'signature':
+        return $('<div class="signature"></div>').text("You will need to sign this form here after it is printed.");
     }
   };
   buildSVGElement = function(item) {
@@ -366,7 +366,9 @@
         return hideInput();
       }
     });
-    item.output.text = $(this.text(item.output.x, item.output.y, ''));
+    item.output.text = $(this.text(item.output.x, item.output.y, '', {
+      "class": item.type
+    }));
     item.output.text.mouseenter(function(event) {
       return showInput();
     }).mouseleave(function(event) {
@@ -374,42 +376,48 @@
         return hideInput();
       }
     });
-    return (item.output.input = $('<input />', {
-      type: item.type
-    }).css({
-      left: ("" + (item.output.x - 2) + "pt"),
-      top: ("" + (item.output.y - item.output.h - 2) + "pt"),
-      width: ("" + (item.output.w + 4) + "pt"),
-      height: ("" + (item.output.h + 4) + "pt"),
-      display: 'none'
-    }).change(function(event) {
-      switch (this.type) {
-        case 'text':
-          return item.output.text.text(this.value);
-        case 'checkbox':
-          return this.value === 'on' ? item.output.text.text("X") : item.output.text.text("");
-      }
-    }).mouseover(function(event) {
-      this.hovered = true;
-      return showInput();
-    }).mouseleave(function(event) {
-      this.hovered = false;
-      if (!(this.focused)) {
-        return hideInput();
-      }
-    }).focus(function(event) {
-      this.focused = true;
-      return showInput();
-    }).blur(function(event) {
-      this.focused = false;
-      return hideInput();
-    }).keydown(function(event) {
-      console.log(event);
-      if (event.keyCode === 13 || event.keyCode === 9) {
-        $(this).change().blur().next().focus();
-        return event.preventDefault();
-      }
-    }).appendTo(this.root().parentElement));
+    switch (item.type) {
+      case 'text':
+      case 'checkbox':
+        return (item.output.input = $('<input />', {
+          type: item.type
+        }).css({
+          left: ("" + (item.output.x - 2) + "pt"),
+          top: ("" + (item.output.y - item.output.h - 2) + "pt"),
+          width: ("" + (item.output.w + 4) + "pt"),
+          height: ("" + (item.output.h + 4) + "pt"),
+          display: 'none'
+        }).change(function(event) {
+          switch (this.type) {
+            case 'text':
+              return item.output.text.text(this.value);
+            case 'checkbox':
+              return this.value === 'on' ? item.output.text.text("X") : item.output.text.text("");
+          }
+        }).mouseover(function(event) {
+          this.hovered = true;
+          return showInput();
+        }).mouseleave(function(event) {
+          this.hovered = false;
+          if (!(this.focused)) {
+            return hideInput();
+          }
+        }).focus(function(event) {
+          this.focused = true;
+          return showInput();
+        }).blur(function(event) {
+          this.focused = false;
+          return hideInput();
+        }).keydown(function(event) {
+          console.log(event);
+          if (event.keyCode === 13 || event.keyCode === 9) {
+            $(this).change().blur().next().focus();
+            return event.preventDefault();
+          }
+        }).appendTo(this.root().parentElement));
+      case "signature":
+        return item.output.text.text("You will need to sign here after the form is printed.");
+    }
   };
   buildIframe = function(data) {
     var iframe, svg;
@@ -440,7 +448,7 @@
     if (data && (typeof (_ref = data.output) !== "undefined" && _ref !== null)) {
       if (!(typeof (_ref = data.output.el) !== "undefined" && _ref !== null)) {
         data.output.el = svg.text(null, data.output.x, data.output.y, '');
-        input.data('meta', data);
+        input.data('meta', j(data));
       }
       if (input.attr('type') === 'text') {
         console.log(data.output.el);

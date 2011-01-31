@@ -28,14 +28,8 @@ example_form =
 	pdf: 'MA_moped.pdf'
 	svg: 'MA_moped.svg'
 	body: [	
-			{	
-				field:	"select"
-				output: true
-				options: [
-						{"label": "New", "output": {"y": 171, "x": 479, "w": 20, "h": 10}}
-						{"label": "Used", "output": {"y": 171, "x": 528, "w": 21, "h": 10}}
-						]
-			}
+			{field:	"checkbox", "label": "New", "output": {"y": 171, "x": 479, "w": 20, "h": 10}}
+			{field: "checkbox", "label": "Used", "output": {"y": 171, "x": 528, "w": 21, "h": 10}}
 			{"field": "text", "label": "Name of Registrant", "output": {"y": 172, "x": 123, "w": 190, "h": 14}}
 			{"field": "text", "label": "Make or Brand Name", "output": {"y": 190, "x": 418, "w": 158, "h": 14}}
 			{"field": "text", "label": "No _/Street", "output": {"y": 191, "x": 86, "w": 227, "h": 14}}
@@ -43,7 +37,7 @@ example_form =
 			{"field": "text", "label": "Year", "output": {"y": 208, "x": 445, "w": 36, "h": 14}}
 			{"field": "text", "label": "Color", "output": {"y": 208, "x": 513, "w": 63, "h": 14}}
 			{"field": "text", "label": "P.O. Box", "output": {"y": 210, "x": 80, "w": 232, "h": 14}}
-			{"field": "text", "label": "VIN", "output": {"y": 227, "x": 349, "w": 10, "h": 14}}
+			{"field": "text", "label": "VIN", "output": {"y": 227, "x": 349, "w": 10, "h": 14, hovered: true}}
 			{"field": "text", "label": "City/Town", "output": {"y": 228, "x": 86, "w": 153, "h": 14}}
 			{"field": "text", "label": "Zip", "output": {"y": 228, "x": 260, "w": 52, "h": 14}}
 			{"field": "signature", "label": "Signature of Registrant", "output": {"y": 529, "x": 186, "w": 220, "h": 14}}
@@ -128,8 +122,8 @@ buildForm =(data)->
 	container = $('<div class="form-layout"></div>')
 		
 	header = $('<div class="header"></div>')
-	.append ($('<div class="provider">').text(data.provider) if data.provider)
-	.append ($('<div class="title">').text(data.title) if data.title)
+	.append(($('<div class="provider">').text(data.provider) if data.provider))
+	.append(($('<div class="title">').text(data.title) if data.title))
 
  
 	# form = $('<form class="paper"></form>')
@@ -139,7 +133,7 @@ buildForm =(data)->
 	# 		.click -> printForm.apply @, [data]
 	# 
 	# form.find('input').change drawField
-		
+	
 	svg = $("<div id='form-svg'></div>")
 	.css(width: '8.5in', height: '11in')
 	.svg loadURL: "/pdfs/#{data.svg}", onLoad: (svg)->
@@ -195,8 +189,8 @@ buildSVGField =(item)->
 	switch item.field		# 
 			# when 'markup'
 			# 	$("<div class='markup'></div>").text(item.body)
-		when 'text', 'date', 'vin'
-			item.type = "text"
+		when 'text', 'date', 'vin', 'checkbox'
+			item.type = item.field
 			buildSVGElement.apply @, [item]
 		when 'select'
 			console.log select: item
@@ -204,8 +198,8 @@ buildSVGField =(item)->
 				console.log building: option
 				option.type = "checkbox"
 				buildSVGElement.apply @, [option]
-		# 		when 'signature'
-		# 			$('<div class="signature"></div>').text "#{item.of} will need to sign this form here after it is printed."
+		when 'signature'
+		 	$('<div class="signature"></div>').text "You will need to sign this form here after it is printed."
 		
 buildSVGElement =(item)->
 	showInput =->
@@ -225,7 +219,7 @@ buildSVGElement =(item)->
 			hideInput() unless item.output.input.hovered or item.output.input.focused
 		)
 		
-	item.output.text = $(@text item.output.x, item.output.y, '')
+	item.output.text = $(@text item.output.x, item.output.y, '', class: item.type)
 	item.output.text
 		.mouseenter((event)->
 			showInput()
@@ -233,8 +227,10 @@ buildSVGElement =(item)->
 		.mouseleave((event)->
 			hideInput() unless item.output.input.hovered or item.output.input.focused
 		)
-	
-	item.output.input = $('<input />', type: item.type)
+		
+	switch item.type
+		when 'text','checkbox'
+			item.output.input = $('<input />', type: item.type)
 							.css(
 								left: "#{item.output.x-2}pt"
 								top: "#{item.output.y-item.output.h-2}pt"
@@ -273,7 +269,8 @@ buildSVGElement =(item)->
 									event.preventDefault()
 							)
 							.appendTo @root().parentElement
-							
+		when "signature"
+			item.output.text.text "You will need to sign here after the form is printed."
 	
 buildIframe =(data)->
 	iframe = $('<iframe id="form-iframe"></iframe>')

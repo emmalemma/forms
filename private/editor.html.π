@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"> </script>
+		<script src="js/middlewares/init.js"> </script>
+		<script src="js/middlewares/functions.js"> </script>
+		<script src="js/jquery-svg.js"> </script>
+		<script src="js/jquery.jqprint.js"> </script>
+		<link rel="stylesheet" type="text/css" href="css/editor.css" />
+		<script src="https://bedlerstaldstreeplaideas:PsSWYT2HI158VeQnMGVDamr5@cushman.cloudant.com/couchdb-xd/_design/couchdb-xd/couchdb.js" type="text/javascript"></script>
+		<style type="text/css">
+			@import "css/jquery.svg.css";
+			#svg1 {
+				width: 200px;
+				height: 200px;
+			}
+		</style>
+		
+	</head>
+	
+	<body>
+		{%
+		api_key	= 	"thwersomearessioutherion"
+		secret 	=	"0lIn0rcuxBTj5eFu8gr7PlAY"
+		Couch.init ->
+			couch = new Couch.Server 'http://cushman.cloudant.com', api_key, secret
+			db = new Couch.Database couch, "forms", (resp)->console.log resp
+			db.get '_design/forms/_view/pending', (data)=>
+															console.log data
+															for line in data.rows
+																$('#pending').append $("<p class='line'/>")
+																	.text(line.key)
+																	.click(loadForm)
+																	
+			interface = 
+				svg: null
+				data: null
+				build:(options)->
+								@svg ?= options.svg
+								@data ?= options.data
+								if @svg and @data
+									for item in @data.body
+										@buildField item
+										#@svg.rect item.output.x, item.output.y-item.output.h, item.output.w, item.output.h, class: "field"
+				buildField: (item)->
+								rect = @svg.rect(item.output.x, item.output.y-item.output.h, item.output.w, item.output.h, class: "field")
+								item.output.box =
+									rect: rect 
+									points:
+										xy: @svg.circle(item.output.x, item.output.y-item.output.h, 3, class: "control-point")
+										wh: @svg.circle(item.output.x+item.output.w, item.output.y, 3, class: "control-point")
+									label: @svg.text(item.output.x, item.output.y, item.label)
+									input: $('<input />').css(
+										left: "#{item.output.x-2}pt"
+										top: "#{item.output.y-item.output.h-2}pt"
+										width: "#{item.output.w+4}pt"
+										height: "#{item.output.h+4}pt"
+										display: 'none')
+								$(item.output.box.rect)
+									.mouseenter((event)=>@svg.change(event.currentTarget, class: "field hover"))
+									.mouseleave((event)=>@svg.change(event.currentTarget, class: "field"))
+								
+								 		
+			loadForm =(event)->
+				console.log event
+				console.log this
+				$('#pending').hide()
+				db.get "_design/forms/_view/filename?value=#{@filename}", (data)->
+																				console.log data
+																				interface.build data: data.rows[0].value
+				$('#editor').svg loadURL: "/pdfs/#{$(@).text()}.svg", onLoad: (svg) ->
+																			console.log svg
+																			svg.configure 
+																				width: '8.5in', height: '11in'
+																				viewBox: "0 0 612 792"
+																			interface.build svg: svg
+			
+			
+		%}
+		<div id="container">
+			<div id="pending">
+				
+			</div>
+			<div id="editor">
+			
+			</div>
+		</div>
+	</body>
+</html>
+ 

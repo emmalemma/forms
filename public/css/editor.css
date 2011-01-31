@@ -62,40 +62,15 @@
 }
 
 .field {
-	fill: green;
+	stroke: red;
+	strokeWidth: 1;
+	fill: transparent;
 }
 
-@media print {
-	body {
-		margin: 0px;
-		padding: 0px;
-	}
-	#container {
-		margin: 0px;
-		padding: 0px;
-		border: 0px;
-		width: 100%;
-	}
-	.header {
-		display: none;
-	}
-	form {
-		display: none;
-	}
-	#form-layout {
-		position: absolute;
-		top: 0px;
-		left: 0px;
-		width: 100%;
-	}
-	#form-svg {
-		width: 100%;
-	}
-	#form-svg input {
-		display: none !important;
-	}
-	#form-svg .signature {
-		display: none; !important;
-	}
-	
+.hover {
+	fill: blue;
+}
+
+.control-point {
+	fill: blue;
 }

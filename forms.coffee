@@ -14,7 +14,8 @@ path = require 'path'
 		adapter: 	'couchdb'
 		host: 		'cushman.cloudant.com'
 		port: 		80
-		name: 		''
+		api_key: 	'parenignodscuryouldrerve' #api key with admin access
+		secret:		'xxSpEupF4O8DfL4r1y5tvBVT'
 		views: 		path.join dir, 	"views.coffee"
 		
 	client_lib:		'jquery'
